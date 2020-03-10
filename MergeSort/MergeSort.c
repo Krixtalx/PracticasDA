@@ -34,8 +34,10 @@ ivector MergeSort(ivector vector, int posInicial, int posFinal)
         return vector;
     else
     {
-        ivector izq = MergeSort(vector, posInicial, posFinal / 2);
-        ivector der = MergeSort(vector, posFinal / 2 + 1, posFinal);
+        ivector izq = icreavector(posFinal/2-posInicial);
+        ivector der = icreavector(posFinal-(posFinal/2+1));
+        izq = MergeSort(vector, posInicial, posFinal / 2);
+        der = MergeSort(vector, posFinal / 2 + 1, posFinal);
         int i = posInicial;
         int j = posFinal / 2;
         int k = 0;
@@ -68,6 +70,7 @@ int main()
         vector[i] = rand() % 100;
     }
     mostrarVector(vector, size);
-    ivector vectorOrdenado = MergeSort(vector, 0, size);
+    ivector vectorOrdenado = icreavector(size);
+    vectorOrdenado = MergeSort(vector, 0, size);
     mostrarVector(vectorOrdenado, size);
 }
