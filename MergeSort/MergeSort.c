@@ -3,13 +3,6 @@
 #include <time.h>
 #include <stdio.h>
 
-void intercambia(int *n1, int *n2)
-{
-    int aux = *n1;
-    *n1 = *n2;
-    *n2 = aux;
-}
-
 void mostrarVector(ivector vector, int tam)
 {
     for (int i = 0; i < tam; i++)
@@ -19,58 +12,46 @@ void mostrarVector(ivector vector, int tam)
     printf("\n");
 }
 
-ivector MergeSort(ivector vector, int posInicial, int posFinal)
+void insercion(ivector vector, int posInicial, int posFinal)
 {
-    int tam = posFinal - posInicial+1;
-    if (tam == 2)
+    int i, j, temp;
+    for (i = posInicial; i <= posFinal; i++)
     {
-        if (vector[0] > vector[1])
+        temp = vector[i];
+        j = i - 1;
+        while (j >= 0 && vector[j] > temp)
         {
-            intercambia(&vector[0], &vector[1]);
+            vector[j + 1] = vector[j];
+            j--;
         }
-        return vector;
+
+        vector[j + 1] = temp;
     }
-    else if (tam == 1)
-        return vector;
-    else
-    {
-        ivector izq = icreavector(posFinal/2-posInicial);
-        ivector der = icreavector(posFinal-(posFinal/2+1));
-        izq = MergeSort(vector, posInicial, posFinal / 2);
-        der = MergeSort(vector, posFinal / 2 + 1, posFinal);
-        int i = posInicial;
-        int j = posFinal / 2;
-        int k = 0;
-        ivector aux = icreavector(tam);
-        while (i < posFinal / 2 && j < posFinal)
-        {
-            if (izq[i] < der[j])
-            {
-                aux[k] = izq[i];
-                i = i + 1;
-            }
-            else
-            {
-                aux[k] = der[j];
-                j = j + 1;
-            }
-            k = k + 1;
-        }
-        return aux;
+}
+
+void MergeSort(ivector vector, int posInicial, int posFinal){
+    int tam = posFinal-posInicial+1;
+    if(tam<=4){
+        insercion(vector, posInicial, posFinal);
+    }
+    else{
+        MergeSort(vector, posInicial, (posFinal+posInicial+1)/2-1);
+        mostrarVector(vector, tam);
+        MergeSort(vector, (posFinal+posInicial+1)/2, posFinal);
+        mostrarVector(vector, tam);
     }
 }
 
 int main()
 {
-    int size = 10;
+    int size = 16;
     ivector vector = icreavector(size);
-    srand(5000);
+    srand(3000);
     for (int i = 0; i < size; i++)
     {
         vector[i] = rand() % 100;
     }
     mostrarVector(vector, size);
-    ivector vectorOrdenado = icreavector(size);
-    vectorOrdenado = MergeSort(vector, 0, size);
-    mostrarVector(vectorOrdenado, size);
+    MergeSort(vector, 0, size - 1);
+    mostrarVector(vector, size);
 }
