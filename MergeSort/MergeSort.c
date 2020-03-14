@@ -19,7 +19,7 @@ void insercion(ivector vector, int posInicial, int posFinal)
     {
         temp = vector[i];
         j = i - 1;
-        while (j >= 0 && vector[j] > temp)
+        while (j >= posInicial && vector[j] > temp)
         {
             vector[j + 1] = vector[j];
             j--;
@@ -29,16 +29,64 @@ void insercion(ivector vector, int posInicial, int posFinal)
     }
 }
 
-void MergeSort(ivector vector, int posInicial, int posFinal){
-    int tam = posFinal-posInicial+1;
-    if(tam<=4){
+void Merge(ivector vector, int posInicial, int posFinal)
+{
+    int tam = posFinal - posInicial + 1;
+    int mitad = (posFinal + posInicial + 1) / 2;
+    int i = posInicial;
+    int j = mitad;
+    int k = 0;
+    ivector aux = icreavector(tam);
+    while (i < mitad && j <= posFinal && k < tam)
+    {
+        if (vector[i] < vector[j])
+        {
+            aux[k] = vector[i];
+            i++;
+        }
+        else
+        {
+            aux[k] = vector[j];
+            j++;
+        }
+        k++;
+    }
+    if (k < tam)
+    {
+        while (i < mitad)
+        {
+            aux[k] = vector[i];
+            i++;
+            k++;
+        }
+        while (j <= posFinal)
+        {
+            aux[k] = vector[j];
+            j++;
+            k++;
+        }
+    }
+    int k2 = 0;
+    for (int i = posInicial; i <= posFinal; i++)
+    {
+        vector[i] = aux[k2];
+        k2++;
+    }
+    ifreevector(&aux);
+}
+
+void MergeSort(ivector vector, int posInicial, int posFinal)
+{
+    int tam = posFinal - posInicial + 1;
+    if (tam <= 4)
+    {
         insercion(vector, posInicial, posFinal);
     }
-    else{
-        MergeSort(vector, posInicial, (posFinal+posInicial+1)/2-1);
-        mostrarVector(vector, tam);
-        MergeSort(vector, (posFinal+posInicial+1)/2, posFinal);
-        mostrarVector(vector, tam);
+    else
+    {
+        MergeSort(vector, posInicial, (posFinal + posInicial + 1) / 2 - 1);
+        MergeSort(vector, (posFinal + posInicial + 1) / 2, posFinal);
+        Merge(vector, posInicial, posFinal);
     }
 }
 
@@ -46,7 +94,7 @@ int main()
 {
     int size = 16;
     ivector vector = icreavector(size);
-    srand(3000);
+    srand(6810);
     for (int i = 0; i < size; i++)
     {
         vector[i] = rand() % 100;
@@ -54,4 +102,5 @@ int main()
     mostrarVector(vector, size);
     MergeSort(vector, 0, size - 1);
     mostrarVector(vector, size);
+    ifreevector(&vector);
 }
