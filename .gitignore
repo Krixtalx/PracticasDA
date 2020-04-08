@@ -1,0 +1,10 @@
+*/*.exe
+*/*.ilk
+*/*.obj
+*/*.pbd
+*/*.pdb
+*.obj
+*.pbd
+*.pdb
+vc140.pdb
+ivector.obj
