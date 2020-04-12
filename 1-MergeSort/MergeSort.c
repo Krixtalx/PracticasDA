@@ -3,6 +3,9 @@
 #include <time.h>
 #include <stdio.h>
 
+/**
+ * Función auxiliar para mostrar el vector
+ */
 void mostrarVector(ivector vector, int tam)
 {
     for (int i = 0; i < tam; i++)
@@ -12,6 +15,9 @@ void mostrarVector(ivector vector, int tam)
     printf("\n");
 }
 
+/**
+ * Algoritmo clásico de ordenación por Inserción
+ */
 void insercion(ivector vector, int posInicial, int posFinal)
 {
     int i, j, temp;
@@ -29,6 +35,9 @@ void insercion(ivector vector, int posInicial, int posFinal)
     }
 }
 
+/**
+ * Función encargada de juntar los resultados
+ */
 void Merge(ivector vector, int posInicial, int posFinal)
 {
     int tam = posFinal - posInicial + 1;

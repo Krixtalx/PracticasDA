@@ -89,7 +89,10 @@ void MergeSort(ivector vector, int posInicial, int posFinal)
         Merge(vector, posInicial, posFinal);
     }
 }
-
+/**
+ * Algoritmo de busqueda binaria. Devuelve la pos donde se encuentra el dato. Si no se encuentra, devuelve -1
+ * @pre: Es necesario que el vector que se pasa como parámetro se encuentre ordenado
+ */
 int BBin(int buscado, ivector vector, int posInicial, int posFinal)
 {
     int mitad = (posInicial + posFinal+1) / 2;
