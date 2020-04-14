@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <windows.h>
 
-#define TAM 200
+#define TAM 10000000
 
 /* retorna "a - b" en segundos */
 double performancecounter_diff(LARGE_INTEGER *a, LARGE_INTEGER *b)
@@ -35,11 +35,11 @@ void mostrarVector(ivector vector, int tam)
     printf("\n");
 }
 
-void intercambia(ivector v1, int pos1, int pos2)
+void intercambia(ivector v, int pos1, int pos2)
 {
-    int aux = v1[pos1];
-    v1[pos1] = v1[pos2];
-    v1[pos2] = aux;
+    int aux = v[pos1];
+    v[pos1] = v[pos2];
+    v[pos2] = aux;
 }
 
 void algClasico(ivector tuercas, ivector tornillos, int posInicio, int posFinal)
@@ -59,92 +59,78 @@ void algClasico(ivector tuercas, ivector tornillos, int posInicio, int posFinal)
     }
 }
 
-int reordenar(ivector v, int posInicio, int posFinal, int pivote)
+int reordenar(ivector v, int posInicio, int posFinal, int pivote, int *inicio)
 {
+    *inicio = posInicio;
     do
     {
         intercambia(v, posInicio, posFinal);
         while (v[posInicio] < pivote)
             posInicio++;
-        while (v[posFinal] >= pivote)
+        while (v[posFinal] > pivote)
             posFinal--;
-
-    } while (posInicio <= posFinal);
-
-    return posInicio;
-}
-
-int reordenar2(ivector v, int posInicio, int posFinal, int pivote, int* posEncontrado)
-{
-    do
-    {
-        intercambia(v, posInicio, posFinal);
-        if(posFinal==*posEncontrado){
-            *posEncontrado=posInicio;
-        }
-        while (v[posInicio] < pivote)
+        if (v[posInicio] == pivote)
+        {
+            intercambia(v, posInicio, *inicio);
+            (*inicio)++;
             posInicio++;
-        while (v[posFinal] >= pivote && posInicio <= posFinal){
-            if(v[posFinal]==pivote){
-                *posEncontrado=posFinal;
-            }
-            posFinal--;
+        }
+        if (v[posFinal] == pivote)
+        {
+            intercambia(v, posFinal, *inicio);
+            (*inicio)++;
+            if (posInicio <= *inicio)
+                posInicio = *inicio;
         }
 
     } while (posInicio <= posFinal);
 
-    return posInicio;
+    return posFinal;
 }
 
 void TornillosTuercas(ivector tuercas, ivector tornillos, int posInicio, int posFinal)
 {
     int tamTornillos = posFinal - posInicio + 1;
-    if (tamTornillos <= 64)
+    if (tamTornillos <= 4194304 * 2)
     {
         algClasico(tuercas, tornillos, posInicio, posFinal);
     }
     else
     {
-        int posTuerca=0;
-        int puntoCorteTuercas = reordenar2(tuercas, posInicio, posFinal, tornillos[posInicio], &posTuerca);
-        int puntoCorteTornillos = reordenar(tornillos, posInicio, posFinal, tuercas[posTuerca]);
-        TornillosTuercas(tuercas, tornillos, posInicio, puntoCorteTornillos - 1);
-        TornillosTuercas(tuercas, tornillos, puntoCorteTornillos, posFinal);
+        int *posTuerca = malloc(sizeof(int));
+        int puntoCorte = reordenar(tuercas, posInicio, posFinal, tornillos[(posInicio + posFinal) / 2], posTuerca);
+        reordenar(tornillos, posInicio, posFinal, tuercas[*posTuerca - 1], posTuerca);
+        TornillosTuercas(tuercas, tornillos, *posTuerca, puntoCorte);
+        TornillosTuercas(tuercas, tornillos, puntoCorte + 1, posFinal);
+        free(posTuerca);
     }
 }
 
 int main()
 {
-    srand(1602);
-    const int limite = 10;
+    srand(88812318);
+    const int limite = 20;
     ivector tuercas = icreavector(TAM);
     ivector tuercas2 = icreavector(TAM);
-    ivector distintos = icreavector(limite);
     ivector tornillos = icreavector(TAM);
     ivector tornillos2 = icreavector(TAM);
 
-    for (int i = 0; i < limite; i++)
-    {
-        distintos[i] = 0;
-    }
-
     for (int i = 0; i < TAM; i++)
     {
         int aux = rand() % limite;
-        distintos[aux]++;
 
         tornillos[i] = aux;
         tornillos2[i] = aux;
-    }
-
-    for (int i = 0; i < TAM; i++)
-    {
-        int aux = rand() % limite;
-        while (distintos[aux] == 0)
-            aux = rand() % limite;
         tuercas[i] = aux;
         tuercas2[i] = aux;
-        distintos[aux]--;
+    }
+
+    for (int i = 0; i < TAM * 2; i++)
+    {
+        int aux1 = rand() % limite;
+        int aux2 = rand() % limite;
+        intercambia(tuercas, aux1, aux2);
+        intercambia(tuercas2, aux1, aux2);
     }
     /*
     printf("Tuercas:   ");
@@ -152,12 +138,12 @@ int main()
     printf("Tornillos: ");
     mostrarVector(tornillos, TAM);
     */
-    
+
     LARGE_INTEGER t_ini, t_fin;
     double secs;
     QueryPerformanceCounter(&t_ini);
 
-    TornillosTuercas(tuercas, tornillos,  0, TAM - 1);
+    TornillosTuercas(tuercas, tornillos, 0, TAM - 1);
 
     QueryPerformanceCounter(&t_fin);
     secs = performancecounter_diff(&t_fin, &t_ini);
@@ -165,24 +151,31 @@ int main()
 
     QueryPerformanceCounter(&t_ini);
 
-    algClasico(tuercas, tornillos, 0, TAM - 1);
+    algClasico(tuercas2, tornillos2, 0, TAM - 1);
 
     QueryPerformanceCounter(&t_fin);
     secs = performancecounter_diff(&t_fin, &t_ini);
     printf("Ha tardado %f segundos el algoritmo clasico\n", secs);
-    
 
-    /*
-    if (correcto(tornillos, tuercas))
+        if (correcto(tornillos, tuercas))
     {
-        printf("Funciona correctamente");
+        printf("Funciona correctamente\n");
     }
     else
     {
-        printf("No funciona correctamente");
+        printf("No funciona correctamente\n");
     }
-    */
-   /*
+
+    if (correcto(tornillos2, tuercas2))
+    {
+        printf("Funciona correctamente\n");
+    }
+    else
+    {
+        printf("No funciona correctamente\n");
+    }
+
+    /*
     printf("\n");
     printf("Tuercas:   ");
     mostrarVector(tuercas, TAM);
@@ -191,7 +184,6 @@ int main()
     */
     ifreevector(&tuercas);
     ifreevector(&tuercas2);
-    ifreevector(&distintos);
     ifreevector(&tornillos);
     ifreevector(&tornillos2);
 }
