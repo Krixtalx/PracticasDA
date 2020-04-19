@@ -67,7 +67,7 @@ struct mayoritario buscaMayoritario(ivector vector, int posInicio, int posFinal)
                     res1.veces++;
                 }
             }
-            if (res1.veces > tam/2)
+            if (res1.veces > tam / 2)
                 return res1;
             return resultado;
         }
@@ -80,7 +80,7 @@ struct mayoritario buscaMayoritario(ivector vector, int posInicio, int posFinal)
                     res2.veces++;
                 }
             }
-            if (res2.veces > tam/2)
+            if (res2.veces > tam / 2)
                 return res2;
             return resultado;
         }
@@ -94,9 +94,9 @@ int main()
     ivector vector = icreavector(size);
     for (int i = 0; i < size; i++)
     {
-        vector[i]=rand()%3;
+        vector[i] = rand() % 3;
     }
-    
+
     mostrarVector(vector, size);
     struct mayoritario resultado = buscaMayoritario(vector, 0, size - 1);
     printf("El mayoritario es %d repitiendose %d veces", resultado.num, resultado.veces);

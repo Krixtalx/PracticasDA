@@ -1,19 +1,9 @@
 #include <stdlib.h>
-#include <time.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <windows.h>
 #include "imatriz2d.h"
 
-#define TAM 16384
-
-/* retorna "a - b" en segundos */
-double performancecounter_diff(LARGE_INTEGER *a, LARGE_INTEGER *b)
-{
-    LARGE_INTEGER freq;
-    QueryPerformanceFrequency(&freq);
-    return (double)(a->QuadPart - b->QuadPart) / (double)freq.QuadPart;
-}
+#define TAM 1024
 
 void mostrarMatriz(imatriz2d matriz)
 {
@@ -38,7 +28,7 @@ void validarMatriz(imatriz2d matriz)
         }
         for (int j = 0; j < TAM; j++)
         {
-            if (usados[matriz[j][i] - 1])
+            if (usados[matriz[j][i] - 1] || matriz[i][j] > TAM)
             {
                 printf("Falla en la fila %d, columna %d\n", j, i);
                 return;
@@ -56,7 +46,7 @@ void validarMatriz(imatriz2d matriz)
         }
         for (int j = 0; j < TAM; j++)
         {
-            if (usados[matriz[i][j] - 1])
+            if (usados[matriz[i][j] - 1] || matriz[i][j] > TAM)
             {
                 printf("Falla en la fila %d, columna %d\n", i, j);
                 return;
@@ -65,7 +55,7 @@ void validarMatriz(imatriz2d matriz)
                 usados[matriz[i][j] - 1] = true;
         }
     }
-    printf("Funciona correctamente");
+    printf("Funciona correctamente\n");
 }
 
 void algClasico(imatriz2d matriz, int posInicialFila, int posFinalFila, int posInicialColumna, int posFinalColumna)
@@ -82,8 +72,8 @@ void algClasico(imatriz2d matriz, int posInicialFila, int posFinalFila, int posI
 
 void cuadradoLatino(imatriz2d matriz, int posInicialFila, int posFinalFila, int posInicialColumna, int posFinalColumna)
 {
-    int tam = posFinalFila - posInicialFila + 1;
-    if (tam <= 4)
+    int tamFila = posFinalFila - posInicialFila + 1;
+    if (tamFila <= 4)
     {
         algClasico(matriz, posInicialFila, posFinalFila, posInicialColumna, posFinalColumna);
     }
@@ -102,18 +92,9 @@ int main()
 {
     imatriz2d matriz = icreamatriz2d(TAM, TAM);
 
-    LARGE_INTEGER t_ini, t_fin;
-    double secs;
-    QueryPerformanceCounter(&t_ini);
-    cuadradoLatino(matriz, 0, TAM - 1, 0, TAM - 1);
-    QueryPerformanceCounter(&t_fin);
-    secs = performancecounter_diff(&t_fin, &t_ini);
-    printf("Ha tardado %f segundos el algoritmo DyV\n", secs);
+    cuadradoLatino(matriz, 0, TAM - 1, 0, TAM - 1, 1);
+    //mostrarMatriz(matriz);
+    validarMatriz(matriz);
 
-    QueryPerformanceCounter(&t_ini);
-    algClasico(matriz, 0, TAM - 1, 0, TAM - 1);
-    QueryPerformanceCounter(&t_fin);
-    secs = performancecounter_diff(&t_fin, &t_ini);
-    printf("Ha tardado %f segundos el algoritmo clasico\n", secs);
     ifreematriz2d(&matriz);
 }

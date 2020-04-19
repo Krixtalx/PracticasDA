@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <windows.h>
 
-#define TAM 10000000
+#ifdef WIN32
 
 /* retorna "a - b" en segundos */
 double performancecounter_diff(LARGE_INTEGER *a, LARGE_INTEGER *b)
@@ -15,6 +15,34 @@ double performancecounter_diff(LARGE_INTEGER *a, LARGE_INTEGER *b)
     return (double)(a->QuadPart - b->QuadPart) / (double)freq.QuadPart;
 }
 
+#define TIME_THIS(X)                                    \
+    {                                                   \
+        LARGE_INTEGER t_ini, t_fin;                     \
+        double secs;                                    \
+        QueryPerformanceCounter(&t_ini);                \
+        X;                                              \
+        QueryPerformanceCounter(&t_fin);                \
+        secs = performancecounter_diff(&t_fin, &t_ini); \
+        printf(#X " ha tardado %f segundos \n", secs);  \
+    }
+#else
+#define TIME_THIS(X)                                                                                                 \
+    {                                                                                                                \
+        struct timespec ts1, ts2;                                                                                    \
+        clock_gettime(CLOCK_REALTIME, &ts1);                                                                         \
+        X;                                                                                                           \
+        clock_gettime(CLOCK_REALTIME, &ts2);                                                                         \
+        printf(#X " ha tardado %f segundos\n",                                                                       \
+               (float)(1.0 * (1.0 * ts2.tv_nsec - ts1.tv_nsec * 1.0) * 1e-9 + 1.0 * ts2.tv_sec - 1.0 * ts1.tv_sec)); \
+    }
+
+#endif
+
+#define TAM 10000000
+
+/**
+* Método auxiliar para comprobar si el algoritmo funciona correctamente.
+*/
 bool correcto(ivector v1, ivector v2)
 {
     for (int i = 0; i < TAM; i++)
@@ -25,6 +53,9 @@ bool correcto(ivector v1, ivector v2)
     return true;
 }
 
+/**
+* Método auxiliar para mostrar el vector.
+*/
 void mostrarVector(ivector vector, int tam)
 {
 
@@ -35,6 +66,9 @@ void mostrarVector(ivector vector, int tam)
     printf("\n");
 }
 
+/**
+* Método auxiliar para intercambiar dos posiciones de un vector.
+*/
 void intercambia(ivector v, int pos1, int pos2)
 {
     int aux = v[pos1];
@@ -42,74 +76,73 @@ void intercambia(ivector v, int pos1, int pos2)
     v[pos2] = aux;
 }
 
+/**
+* Algoritmo clásico para resolver el problema. Escoge un tornillo y compara con las tuercas hasta que encuentre una coincidente. Después, repitirá lo mismo con el siguiente tornillo.
+*/
 void algClasico(ivector tuercas, ivector tornillos, int posInicio, int posFinal)
 {
     for (int j = posInicio; j <= posFinal; j++)
     {
-        bool aux = false;
-        for (int i = posInicio; i <= posFinal && !aux; i++)
+        for (int i = j; i <= posFinal; i++)
         {
             if (tuercas[i] == tornillos[j])
             {
-                intercambia(tuercas, posInicio, i);
-                aux = true;
+                intercambia(tuercas, j, i);
+                i = posFinal + 1;
             }
         }
-        posInicio++;
     }
 }
 
+/**
+* Reordena el vector dejando los valores menores que el pivote por debajo de *inicio y los mayores por encima de posFinal.
+*/
 int reordenar(ivector v, int posInicio, int posFinal, int pivote, int *inicio)
 {
     *inicio = posInicio;
-    do
+    while (posInicio <= posFinal)
     {
-        intercambia(v, posInicio, posFinal);
-        while (v[posInicio] < pivote)
+        if (v[posInicio] < pivote)
+        {
+            intercambia(v, *inicio, posInicio);
             posInicio++;
-        while (v[posFinal] > pivote)
+            (*inicio)++;
+        }
+        else if (v[posInicio] == pivote)
+        {
+            posInicio++;
+        }
+        else
+        {
+            intercambia(v, posInicio, posFinal);
             posFinal--;
-        if (v[posInicio] == pivote)
-        {
-            intercambia(v, posInicio, *inicio);
-            (*inicio)++;
-            posInicio++;
         }
-        if (v[posFinal] == pivote)
-        {
-            intercambia(v, posFinal, *inicio);
-            (*inicio)++;
-            if (posInicio <= *inicio)
-                posInicio = *inicio;
-        }
-
-    } while (posInicio <= posFinal);
+    }
 
     return posFinal;
 }
 
 void TornillosTuercas(ivector tuercas, ivector tornillos, int posInicio, int posFinal)
 {
-    int tamTornillos = posFinal - posInicio + 1;
-    if (tamTornillos <= 4194304 * 2)
+    int tam = posFinal - posInicio + 1;
+    if (tam <= TAM / 256)
     {
         algClasico(tuercas, tornillos, posInicio, posFinal);
     }
     else
     {
-        int *posTuerca = malloc(sizeof(int));
-        int puntoCorte = reordenar(tuercas, posInicio, posFinal, tornillos[(posInicio + posFinal) / 2], posTuerca);
-        reordenar(tornillos, posInicio, posFinal, tuercas[*posTuerca - 1], posTuerca);
-        TornillosTuercas(tuercas, tornillos, *posTuerca, puntoCorte);
+        int posTuerca;
+        int puntoCorte = reordenar(tuercas, posInicio, posFinal, tornillos[(posInicio + posFinal) / 2], &posTuerca);
+        reordenar(tornillos, posInicio, posFinal, tuercas[posTuerca], &posTuerca);
+        TornillosTuercas(tuercas, tornillos, posInicio, posTuerca - 1);
         TornillosTuercas(tuercas, tornillos, puntoCorte + 1, posFinal);
-        free(posTuerca);
     }
 }
 
 int main()
 {
     srand(88812318);
-    const int limite = 20;
+    const int limite = 200;
     ivector tuercas = icreavector(TAM);
     ivector tuercas2 = icreavector(TAM);
     ivector tornillos = icreavector(TAM);
@@ -125,39 +158,24 @@ int main()
         tuercas2[i] = aux;
     }
 
-    for (int i = 0; i < TAM * 2; i++)
+    for (int i = 0; i < TAM; i++)
     {
-        int aux1 = rand() % limite;
-        int aux2 = rand() % limite;
-        intercambia(tuercas, aux1, aux2);
-        intercambia(tuercas2, aux1, aux2);
+        int aux1 = rand() % TAM;
+        intercambia(tuercas, i, aux1);
+        intercambia(tuercas2, i, aux1);
     }
     /*
     printf("Tuercas:   ");
-    mostrarVector(tuercas, TAM);
+    mostrarVector(tuercas2, TAM);
     printf("Tornillos: ");
-    mostrarVector(tornillos, TAM);
+    mostrarVector(tornillos2, TAM);
     */
 
-    LARGE_INTEGER t_ini, t_fin;
-    double secs;
-    QueryPerformanceCounter(&t_ini);
+    TIME_THIS(TornillosTuercas(tuercas, tornillos, 0, TAM - 1));
 
-    TornillosTuercas(tuercas, tornillos, 0, TAM - 1);
+    TIME_THIS(algClasico(tuercas2, tornillos2, 0, TAM - 1));
 
-    QueryPerformanceCounter(&t_fin);
-    secs = performancecounter_diff(&t_fin, &t_ini);
-    printf("Ha tardado %f segundos el algoritmo DyV\n", secs);
-
-    QueryPerformanceCounter(&t_ini);
-
-    algClasico(tuercas2, tornillos2, 0, TAM - 1);
-
-    QueryPerformanceCounter(&t_fin);
-    secs = performancecounter_diff(&t_fin, &t_ini);
-    printf("Ha tardado %f segundos el algoritmo clasico\n", secs);
-
-        if (correcto(tornillos, tuercas))
+    if (correcto(tornillos, tuercas))
     {
         printf("Funciona correctamente\n");
     }
@@ -174,13 +192,12 @@ int main()
     {
         printf("No funciona correctamente\n");
     }
-
     /*
     printf("\n");
     printf("Tuercas:   ");
-    mostrarVector(tuercas, TAM);
+    mostrarVector(tuercas2, TAM);
     printf("Tornillos: ");
-    mostrarVector(tornillos, TAM);
+    mostrarVector(tornillos2, TAM); 
     */
     ifreevector(&tuercas);
     ifreevector(&tuercas2);

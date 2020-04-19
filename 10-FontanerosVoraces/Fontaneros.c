@@ -11,7 +11,7 @@ struct trabajo
 };
 typedef struct trabajo trabajos;
 
-int compare(const void *_a, const void *_b)
+int compareTo(const void *_a, const void *_b)
 {
 
     struct trabajo *a, *b;
@@ -51,6 +51,6 @@ int main()
     }
 
     mostrarVector(vTrabajos, TAM);
-    qsort(vTrabajos, TAM, sizeof(trabajos), &compare);
+    qsort(vTrabajos, TAM, sizeof(trabajos), &compareTo);
     mostrarVector(vTrabajos, TAM);
 }

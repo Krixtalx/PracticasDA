@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <windows.h>
 
+#ifdef WIN32
 /* retorna "a - b" en segundos */
 double performancecounter_diff(LARGE_INTEGER *a, LARGE_INTEGER *b)
 {
@@ -11,6 +12,29 @@ double performancecounter_diff(LARGE_INTEGER *a, LARGE_INTEGER *b)
     QueryPerformanceFrequency(&freq);
     return (double)(a->QuadPart - b->QuadPart) / (double)freq.QuadPart;
 }
+
+#define TIME_THIS(X)                                    \
+    {                                                   \
+        LARGE_INTEGER t_ini, t_fin;                     \
+        double secs;                                    \
+        QueryPerformanceCounter(&t_ini);                \
+        X;                                              \
+        QueryPerformanceCounter(&t_fin);                \
+        secs = performancecounter_diff(&t_fin, &t_ini); \
+        printf(#X " ha tardado %f segundos \n", secs);  \
+    }
+#else
+#define TIME_THIS(X)                                                                                                 \
+    {                                                                                                                \
+        struct timespec ts1, ts2;                                                                                    \
+        clock_gettime(CLOCK_REALTIME, &ts1);                                                                         \
+        X;                                                                                                           \
+        clock_gettime(CLOCK_REALTIME, &ts2);                                                                         \
+        printf(#X " ha tardado %f segundos\n",                                                                       \
+               (float)(1.0 * (1.0 * ts2.tv_nsec - ts1.tv_nsec * 1.0) * 1e-9 + 1.0 * ts2.tv_sec - 1.0 * ts1.tv_sec)); \
+    }
+
+#endif
 
 void mostrarPolinomio(ivector vector, int posInicial, int posFinal)
 {
@@ -40,14 +64,6 @@ ivector suma(ivector pol1, ivector pol2, int posInicial1, int posFinal1, int pos
 
         res[i] = pol1[i + posInicial1] + pol2[i + posInicial2];
     }
-
-    /*printf("Suma entre: ");
-    printf("\n");
-    mostrarPolinomio(pol1, posInicial1, posFinal1 + 1);
-    mostrarPolinomio(pol2, posInicial2, posFinal2 + 1);
-    mostrarPolinomio(res, 0, tam);
-    printf("\n");*/
-
     return res;
 }
 
@@ -61,12 +77,6 @@ ivector resta(ivector pol1, ivector pol2, int posInicial1, int posFinal1, int po
 
         res[i] = pol1[i + posInicial1] - pol2[i + posInicial2];
     }
-    /*printf("Resta entre: ");
-    printf("\n");
-    mostrarPolinomio(pol1, posInicial1, posFinal1 + 1);
-    mostrarPolinomio(pol2, posInicial2, posFinal2 + 1);
-    mostrarPolinomio(res, 0, tam);
-    printf("\n");*/
     return res;
 }
 
@@ -94,7 +104,7 @@ ivector multDyV(ivector pol1, ivector pol2, int posInicial1, int posFinal1, int 
 {
     int tam = posFinal1 - posInicial1 + 1;
 
-    if (tam <= 64)
+    if (tam <= 32)
     {
         return multClasico(pol1, pol2, posInicial1, posFinal1, posInicial2, posFinal2);
     }
@@ -130,7 +140,7 @@ ivector multDyV(ivector pol1, ivector pol2, int posInicial1, int posFinal1, int 
 
 int main()
 {
-    const int size = 25000;
+    const int size = 50000;
     srand(1682);
     ivector vector1 = icreavector(size);
     ivector vector2 = icreavector(size);
@@ -139,19 +149,11 @@ int main()
     rellenaVector(vector1, size);
     rellenaVector(vector2, size);
 
-    LARGE_INTEGER t_ini, t_fin;
-    double secs;
-    QueryPerformanceCounter(&t_ini);
-    vectorRes = multDyV(vector1, vector2, 0, size - 1, 0, size - 1);
-    QueryPerformanceCounter(&t_fin);
-    secs = performancecounter_diff(&t_fin, &t_ini);
-    printf("Ha tardado %f segundos el algoritmo DyV", secs);
-    QueryPerformanceCounter(&t_ini);
-    vectorRes = multClasico(vector1, vector2, 0, size - 1, 0, size - 1);
-    QueryPerformanceCounter(&t_fin);
-    secs = performancecounter_diff(&t_fin, &t_ini);
-    printf("\nHa tardado %f segundos el algoritmo clasico", secs);
-    
+    TIME_THIS(vectorRes = multDyV(vector1, vector2, 0, size - 1, 0, size - 1));
+    //mostrarPolinomio(vectorRes, 0, size - 1);
+    TIME_THIS(vectorRes = multClasico(vector1, vector2, 0, size - 1, 0, size - 1));
+    //mostrarPolinomio(vectorRes, 0, size - 1);
+
     ifreevector(&vector1);
     ifreevector(&vector2);
     ifreevector(&vectorRes);
