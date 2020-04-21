@@ -26,6 +26,7 @@ void validarMatriz(imatriz2d matriz)
         {
             usados[j] = false;
         }
+        
         for (int j = 0; j < TAM; j++)
         {
             if (usados[matriz[j][i] - 1] || matriz[i][j] > TAM)
@@ -44,6 +45,7 @@ void validarMatriz(imatriz2d matriz)
         {
             usados[j] = false;
         }
+
         for (int j = 0; j < TAM; j++)
         {
             if (usados[matriz[i][j] - 1] || matriz[i][j] > TAM)
