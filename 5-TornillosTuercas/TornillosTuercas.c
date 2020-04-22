@@ -122,10 +122,13 @@ int reordenar(ivector v, int posInicio, int posFinal, int pivote, int *inicio)
     return posFinal;
 }
 
+/**
+ * Algoritmo Divide y Vencerás que soluciona el problema. Reordena las tuercas utilizando el método de reordenado y mas tarde hace lo mismo con los tornillos. Después, realiza llamadas recursivas a esta función hasta que tam<=umbral
+ */
 void TornillosTuercas(ivector tuercas, ivector tornillos, int posInicio, int posFinal)
 {
     int tam = posFinal - posInicio + 1;
-    if (tam <= TAM / 256)
+    if (tam <= 32)
     {
         algClasico(tuercas, tornillos, posInicio, posFinal);
     }
@@ -173,7 +176,7 @@ int main()
 
     TIME_THIS(TornillosTuercas(tuercas, tornillos, 0, TAM - 1));
 
-    TIME_THIS(algClasico(tuercas2, tornillos2, 0, TAM - 1));
+    //TIME_THIS(algClasico(tuercas2, tornillos2, 0, TAM - 1));
 
     if (correcto(tornillos, tuercas))
     {
