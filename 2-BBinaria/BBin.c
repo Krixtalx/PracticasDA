@@ -3,6 +3,9 @@
 #include <time.h>
 #include <stdio.h>
 
+/**
+ * Función auxiliar para mostrar el vector
+ */
 void mostrarVector(ivector vector, int tam)
 {
     for (int i = 0; i < tam; i++)
@@ -74,7 +77,9 @@ void Merge(ivector vector, int posInicial, int posFinal)
     }
     ifreevector(&aux);
 }
-
+/**
+ * Algoritmo de ordenación utilizado para ordenar el vector antes de hacer la Busqueda binaria
+ */
 void MergeSort(ivector vector, int posInicial, int posFinal)
 {
     int tam = posFinal - posInicial + 1;

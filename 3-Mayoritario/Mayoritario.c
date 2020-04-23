@@ -3,6 +3,9 @@
 #include <time.h>
 #include <stdio.h>
 
+/**
+ * Función auxiliar para mostrar el vector
+ */
 void mostrarVector(ivector vector, int tam)
 {
     for (int i = 0; i < tam; i++)

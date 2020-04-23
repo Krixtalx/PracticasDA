@@ -83,6 +83,7 @@ void Merge(ivector vector, int posInicial, int posFinal)
     ifreevector(&aux);
 }
 
+
 void MergeSort(ivector vector, int posInicial, int posFinal)
 {
     int tam = posFinal - posInicial + 1;

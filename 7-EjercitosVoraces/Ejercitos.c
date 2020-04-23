@@ -42,7 +42,7 @@ void intercambia(ivector v, int pos1, int pos2)
 }
 
 /**
- * Empareja cada aliado con el "menor" adversario de los que puede vencer. En el caso de que no haya ninguno, se empareja con el mayor ejercito enemigo.
+ * Empareja cada aliado con el "mayor" adversario de los que puede vencer. En el caso de que no haya ninguno, se empareja con el mayor ejercito enemigo.
  */
 void heuristicaVoraz(ivector enemigos, ivector aliados)
 {
@@ -85,6 +85,12 @@ void heuristicaVoraz2(ivector enemigos, ivector aliados)
 {
     qsort(enemigos, TAM, sizeof(int), compareTo);
     qsort(aliados, TAM, sizeof(int), compareTo);
+
+    for (int i = 0; i < TAM; i++)
+    {
+        printf("El ejercito %d aliado combatira contra el ejercito %d enemigo\n", aliados[i], enemigos[i]);
+    }
+    
 }
 
 int main()

@@ -51,6 +51,6 @@ int main()
     }
 
     mostrarVector(vTrabajos, TAM);
-    qsort(vTrabajos, TAM, sizeof(trabajos), &compareTo);
+    qsort(vTrabajos, TAM, sizeof(trabajos), &compareTo); //La heurística es simplemente ordenar el array de trabajos.
     mostrarVector(vTrabajos, TAM);
 }
