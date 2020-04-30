@@ -43,23 +43,63 @@ int maximo(int i, int j)
 
 ivector botellon(imatriz2d matriz, ivector datos)
 {
-    ivector solucion = icreavector(TAM);
-    solucion[TAM - 1] = 0;
     for (int i = 0; i < TAM - 1; i++)
     {
-        solucion[i] = 0;
         matriz[i][i + 1] = maximo(datos[i], datos[i + 1]);
     }
 
     for (int i = 3; i < TAM; i += 2)
     {
-        for (int j = 0; i + j < TAM; j++)
+        for (int fila = 0; i + fila < TAM; fila++)
         {
-            int k = i + j;
-            int camino1 = maximo(matriz[j + 1][k - 1], matriz[j + 2][k]);
-            int camino2 = maximo(matriz[j + 1][k - 1], matriz[j][k - 2]);
-            matriz[j][k] = maximo(datos[j] + camino1, datos[k] + camino2);
+            int columna = i + fila;
+            int camino1 = 0;
+            int camino2 = 0;
+            if (datos[columna] > datos[fila + 1])
+                camino1 = matriz[fila + 1][columna - 1];
+            else if (datos[columna] < datos[fila + 1])
+                camino1 = matriz[fila + 2][columna];
+
+            if (datos[fila] > datos[columna - 1])
+                camino2 = matriz[fila + 1][columna - 1];
+            else if (datos[fila] < datos[columna - 1])
+                camino2 = matriz[fila][columna - 2];
+
+            matriz[fila][columna] = maximo(datos[fila] + camino1, datos[columna] + camino2);
         }
+    }
+
+    ivector solucion = icreavector(TAM);
+    int fila = 0;
+    int columna = TAM - 1;
+    while (fila < columna)
+    {
+        //Listillo
+
+        if (matriz[fila][columna] == datos[fila] + matriz[fila + 2][columna])
+        {
+            solucion[fila++] = 1;
+        }
+        else if (matriz[fila][columna] == datos[fila] + matriz[fila + 1][columna - 1])
+        {
+            solucion[fila++] = 1;
+        }
+
+        else if (matriz[fila][columna] == datos[columna] + matriz[fila + 1][columna - 1])
+        {
+            solucion[columna--] = 1;
+        }
+        else if (matriz[fila][columna] == datos[columna] + matriz[fila][columna + 2])
+        {
+            solucion[columna--] = 1;
+        }
+
+        //Agonioso
+
+        if (datos[fila] > datos[columna])
+            solucion[fila++] = 0;
+        else
+            solucion[columna--] = 0;
     }
 
     return solucion;
@@ -69,7 +109,7 @@ int main()
 {
     ivector problema = icreavector(TAM);
     imatriz2d matriz = icreamatriz2d(TAM, TAM);
-    int aux[] = {6, 4, 7, 9, 10, 2, 3, 3, 4, 8};
+    int aux[] = {3, 15, 20, 45, 1, 2, 11, 10, 3, 1};
     for (int i = 0; i < TAM; i++)
     {
         problema[i] = aux[i];
@@ -83,13 +123,23 @@ int main()
     }
 
     ivector solucion = botellon(matriz, problema);
+    int valor = 0;
+    for (int i = 0; i < TAM; i++)
+    {
+        if (solucion[i] == 1)
+        {
+            valor += problema[i];
+        }
+    }
+
     printf("\nVasos: ");
     mostrarVector(problema);
     printf("\nMatriz de memorizacion: \n");
     mostrarMatriz(matriz);
 
-    printf("\nSolucion: \n");
+    printf("\nSolucion:\n1->Listillo      0->Agonioso\n");
     mostrarVector(solucion);
+    printf("Valor: %d", valor);
 
     ifreevector(&problema);
     ifreevector(&solucion);
