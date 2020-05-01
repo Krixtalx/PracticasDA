@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int funcion(int n)
+int AlgoritmoPDin(int n)
 {
     ivector memoria = icreavector(2);
     memoria[0] = 3;
@@ -10,12 +10,12 @@ int funcion(int n)
 
     for (int i = 2; i < n; i++)
     {
-        if (n % 2 == 1)
+        if (i % 2 == 1)
             memoria[i % 2] = memoria[(i - 1) % 2] - 3;
         else
-            memoria[i % 2] = memoria[(i - 1) % 2] + 3;
+            memoria[i % 2] = memoria[i % 2] + 3;
 
-        printf("El calculo para el termino %d es %d\n", i, memoria[i % 2]);
+        //printf("El calculo para el termino %d es %d\n", i+1, memoria[i % 2]);
     }
     int resultado = memoria[(n - 1) % 2];
     ifreevector(&memoria);
@@ -24,7 +24,7 @@ int funcion(int n)
 
 int main()
 {
-    int termino = 6;
-    int resultado = funcion(termino);
+    int termino = 20;
+    int resultado = AlgoritmoPDin(termino);
     printf("El calculo para el termino %d es %d\n", termino, resultado);
 }

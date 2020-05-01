@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int funcion(int n)
+int OperacionesAlgGauss(int n)
 {
     ivector memoria = icreavector(4);
     memoria[0] = 0;
@@ -23,6 +23,6 @@ int funcion(int n)
 int main()
 {
     int dimension = 25;
-    int resultado = funcion(dimension);
+    int resultado = OperacionesAlgGauss(dimension);
     printf("La cantidad maxima de operaciones que usa el algoritmo de Gauss para triangular una matriz de dimension %d es %d\n", dimension, resultado);
 }
